@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ./endpoints /endpoints/video-retrieve.php

@@ -1,38 +1,19 @@
-// Method: POST, PUT, GET etc
-// Data: array("param" => "value") ==> index.php?param=value
-// You can access any REST API with PHPs cURL Extension. 
-// However, the API Documentation (Methods, Parameters etc.) must be provided by your Client!
+<?php
 
-function CallAPI($method, $url, $data = false)
-{
-    $curl = curl_init();
+// include("./src/VideoController.php");
 
-    switch ($method)
-    {
-        case "POST":
-            curl_setopt($curl, CURLOPT_POST, 1);
+// Used for imports
+spl_autoload_register(function ($class){
+    require __DIR__ . "./src/$class.php";
+});
 
-            if ($data)
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-            break;
-        case "PUT":
-            curl_setopt($curl, CURLOPT_PUT, 1);
-            break;
-        default:
-            if ($data)
-                $url = sprintf("%s?%s", $url, http_build_query($data));
-    }
+$uriParts = explode("/", $_SERVER["REQUEST_URI"]);
+// print_r($uriParts);
 
-    // Optional Authentication:
-    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($curl, CURLOPT_USERPWD, "username:password");
+// Get first uri parameter
+$id = $uriParts[4] ?? null;
 
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+$controller = new VideoController;
+$controller->processRequest($_SERVER["REQUEST_METHOD"], $id);
 
-    $result = curl_exec($curl);
-
-    curl_close($curl);
-
-    return $result;
-}
+?>

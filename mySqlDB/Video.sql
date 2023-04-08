@@ -36,5 +36,4 @@ INSERT INTO `Videos` (id, name) VALUES
 (1, 'sample.mp4');
 
 # INSERT INTO `Segments` VALUES
-# (2,11),
-# (3,11);
+# TODO

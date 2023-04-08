@@ -19,11 +19,6 @@
             <div class="navbar-header">
                 <a class="navbar-brand" href="#">COMP 445 - Backend</a>
             </div>
-            <!-- <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="./endpoints/home.php">.</a></li>
-            </ul> -->
-        </div>
     </nav>
 
     <div class="container">
@@ -42,8 +37,7 @@
                     </div>
 
                     <div class="p-4 text-center border-top">
-                        <!-- This button will start the video recording -->
-                        <button type="button" class="btn btn-primary"></button>
+                        <button type="button" class="btn btn-primary">AAAAAAAA</button>
                     </div>
                 </div>
             </div>

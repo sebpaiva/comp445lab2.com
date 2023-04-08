@@ -1,2 +1,5 @@
 RewriteEngine On
-RewriteRule ./endpoints /endpoints/video-retrieve.php
+RewriteRule ./endpoints/video-retrieve.php /endpoints/video-retrieve.php
+RewriteRule ./endpoints/video-upload.php /endpoints/video-upload.php
+
+Header add Access-Control-Allow-Origin "*"

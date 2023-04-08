@@ -2,6 +2,8 @@
 
 <?php
 
+header("Access-Control-Allow-Origin: *");
+
 error_reporting(1);
 
 $con = mysql_connect("localhost", "root", "");

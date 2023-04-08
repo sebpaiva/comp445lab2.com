@@ -1,6 +1,10 @@
 <?php
 
-// include("./src/VideoController.php");
+header("Access-Control-Allow-Origin:*");
+// header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Credentials:true");
+header("Access-Control-Allow-Methods:GET,HEAD,OPTIONS,POST,PUT");
+header("Access-Control-Allow-Headers:Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
 // Used for imports
 spl_autoload_register(function ($class){
@@ -8,7 +12,6 @@ spl_autoload_register(function ($class){
 });
 
 $uriParts = explode("/", $_SERVER["REQUEST_URI"]);
-// print_r($uriParts);
 
 // Get first uri parameter
 $id = $uriParts[4] ?? null;

@@ -9,3 +9,17 @@ header("Access-Control-Allow-Headers:Access-Control-Allow-Headers,Origin,Accept,
 spl_autoload_register(function ($class){
     require __DIR__ . "./src/$class.php";
 });
+
+// Get the URI parts
+$uriParts = explode("/", $_SERVER["REQUEST_URI"]);
+
+// Determine the requested endpoint
+$endpoint = $uriParts[4] ?? null;
+
+// Instantiate the appropriate controller based on the endpoint
+if ($endpoint == "getVideoId") {
+    $controller = new VideoController;
+    $controller->getVideoId();
+} else {
+    http_response_code(404);
+}

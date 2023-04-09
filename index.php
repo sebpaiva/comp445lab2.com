@@ -1,3 +1,8 @@
+
+<?php
+require_once 'endpoints/src/VideoController.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,11 +26,11 @@
             </div>
     </nav>
 
-    <div class="container">
+    <!-- <div class="container">
         <h2>Video Storage</h2>
 
 
-        <!-- For each video, get sql -->        
+         --><!-- For each video, get sql --><!--
         <div class="row">
             <div class="col-md-6">
                 <div class="bg-white border rounded-5">
@@ -42,7 +47,34 @@
                 </div>
             </div>
         </div>
+    </div> -->
+
+    <div class="container">
+        <h2>Video Storage</h2>
+
+        <div class="row">
+            <?php
+            // Create a new instance of the VideoController
+            $videoController = new VideoController();
+
+            // Get all video names
+            $videoNames = $videoController->getAllVideos();
+
+            // Loop through video names and display them
+            foreach ($videoNames as $name) {
+                echo '<div class="col-md-6">';
+                echo '<div class="bg-white border rounded-5">';
+                echo '<div class="p-4 text-center">';
+                echo '<video src="videos/' . $name . '" controls></video>';
+                echo '<p>' . $name . '</p>';
+                echo '</div>';
+                echo '</div>';
+                echo '</div>';
+            }
+            ?>
+        </div>
     </div>
+
 
 </body>
 

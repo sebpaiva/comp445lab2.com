@@ -33,7 +33,11 @@ CREATE TABLE `Segments` (
 -- DATA INSERTS
 --
 INSERT INTO `Videos` (id, name) VALUES
-(1, 'sample.mp4');
+(1, 'sample1.mp4'),
+(2, 'sample2.mp4'),
+(3, 'sample3.mp4'),
+(4, 'sample4.mp4'),
+(5, 'sample5.mp4');
 
 # INSERT INTO `Segments` VALUES
 # TODO

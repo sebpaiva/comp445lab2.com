@@ -58,7 +58,7 @@ require_once 'endpoints/src/VideoController.php';
             $videoController = new VideoController();
 
             // Get all video names
-            $videoNames = $videoController->getAllVideos();
+            $videoNames = $videoController->getAllVideosName();
 
             // Loop through video names and display them
             foreach ($videoNames as $name) {

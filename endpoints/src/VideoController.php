@@ -4,7 +4,7 @@ class VideoController
      /**
          * Get all video names from the Videos sql table
          */
-        /*public function getAllVideos()
+        public function getAllVideosName()
         {
             $conn = $this->createConnection();
 
@@ -23,7 +23,7 @@ class VideoController
 
             return $result;
         }
-        */
+
         public function getAllVideos()
         {
             $conn = $this->createConnection();

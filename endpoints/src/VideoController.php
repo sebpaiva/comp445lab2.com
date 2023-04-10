@@ -1,7 +1,65 @@
 <?php
 class VideoController
 {
-     /**
+
+        public function uploadSegment() {
+            $fileData = file_get_contents("php://input");
+            $sequenceNumber = $_SERVER["HTTP_SEQUENCE_NUMBER"];
+            $videoId = $_SERVER["HTTP_VIDEO_ID"];
+
+            $conn = $this->createConnection();
+
+            // Check if the segment already exists in the database
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Segments WHERE video_id = ? AND sequence_number = ?");
+            $stmt->bind_param("ii", $videoId, $sequenceNumber);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+            $count = $result['count'];
+            $stmt->close();
+
+            if ($count == 0) {
+                // If the segment doesn't exist, insert it into the database
+                $stmt = $conn->prepare("INSERT INTO Segments (video_id, sequence_number, data) VALUES (?, ?, ?)");
+                $stmt->bind_param("iis", $videoId, $sequenceNumber, $fileData);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // If the segment already exists, you could either overwrite it or do nothing
+                // Here, we will do nothing and just send a success response
+            }
+
+            // Send a success response
+            http_response_code(200);
+
+            $conn->close();
+        }
+
+        public function finishUpload(videoID) {
+            // Create a connection to the database
+                $conn = $this->createConnection();
+
+                // Retrieve all segments for the given videoID
+                $sql = "SELECT segment FROM Segments WHERE videoID = :videoID ORDER BY segmentID";
+                $stmt = $conn->prepare($sql);
+                $stmt->bindValue(":videoID", $videoID, PDO::PARAM_INT);
+                $stmt->execute();
+
+                // Combine the segments into a single video file
+                $videoData = "";
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $videoData .= $row["segment"];
+                }
+
+                // Store the assembled video under the videos folder
+                $filePath = "videos/video_$videoID.mp4";
+                file_put_contents($filePath, $videoData);
+
+                $conn->close();
+
+        }
+
+
+         /**
          * Get all video names from the Videos sql table
          */
         public function getAllVideosName()

@@ -16,6 +16,9 @@ $uriParts = explode("/", $_SERVER["REQUEST_URI"]);
 // Determine the requested endpoint
 $endpoint = $uriParts[4] ?? null;
 
+// Determine the requested endpoint
+$vid_ID = $uriParts[5] ?? null;
+
 // Instantiate the appropriate controller based on the endpoint
 if ($endpoint == "getVideoId" && $_SERVER["REQUEST_METHOD"] == "GET") {
     $controller = new VideoController;
@@ -24,6 +27,23 @@ if ($endpoint == "getVideoId" && $_SERVER["REQUEST_METHOD"] == "GET") {
     // CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET
     // This else if is exclusively so that the preflight call doesn't increase the id before the actual call
     http_response_code(200);
+} else if ($endpoint == "uploadSegment" && $_SERVER["REQUEST_METHOD"] == "POST") {
+    $controller = new VideoController;
+    $controller->uploadSegment();
+} else if ($endpoint == "uploadSegment"){
+    // CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET
+    // This else if is exclusively so that the preflight call doesn't increase the id before the actual call
+    http_response_code(200);
+} else if ($endpoint == "finishUpload/{$vid_ID}" && $_SERVER["REQUEST_METHOD"] == "GET") {
+    $controller = new VideoController;
+    $controller->finishUpload($vid_ID);
+} else if ($endpoint == "finishUpload/{$vid_ID}"){
+    // CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET
+    // This else if is exclusively so that the preflight call doesn't increase the id before the actual call
+    http_response_code(200);
 } else {
     http_response_code(404);
 }
+
+
+

@@ -3,38 +3,45 @@ class VideoController
 {
 
         public function uploadSegment() {
-            $fileData = file_get_contents("php://input");
-            $sequenceNumber = $_SERVER["HTTP_SEQUENCE_NUMBER"];
-            $videoId = $_SERVER["HTTP_VIDEO_ID"];
+            $segment = file_get_contents("php://input");
+            $videoId = $segment['videoId'];
+            $sequenceNumber = $segment['sequenceNumber'];
+            $isDelivered = $segment['isDelivered'];
+            $data = $segment['data'];
 
             $conn = $this->createConnection();
 
-            // Check if the segment already exists in the database
-            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Segments WHERE video_id = ? AND sequence_number = ?");
-            $stmt->bind_param("ii", $videoId, $sequenceNumber);
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM Segments WHERE video_id = ? AND sequenceNumber = ?");
+            $stmt->bindParam(1, $videoId);
+            $stmt->bindParam(2, $sequenceNumber);
             $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-            $count = $result['count'];
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->close();
 
-            if ($count == 0) {
-                // If the segment doesn't exist, insert it into the database
-                $stmt = $conn->prepare("INSERT INTO Segments (video_id, sequence_number, data) VALUES (?, ?, ?)");
-                $stmt->bind_param("iis", $videoId, $sequenceNumber, $fileData);
-                $stmt->execute();
-                $stmt->close();
-            } else {
-                // If the segment already exists, you could either overwrite it or do nothing
-                // Here, we will do nothing and just send a success response
+            if ($result['COUNT(*)'] > 0) {
+                // Sequence number already exists, send success response and return
+                http_response_code(200);
+                return;
             }
 
-            // Send a success response
-            http_response_code(200);
+            $stmt = $conn->prepare("INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES (?, ?, ?, ?)");
+            $stmt->bindParam(1, $videoId);
+            $stmt->bindParam(2, $sequenceNumber);
+            $stmt->bindParam(3, $isDelivered);
+            $stmt->bindParam(4, $data, PDO::PARAM_LOB);
+            $stmt->execute();
+            $stmt->close();
 
+
+            http_response_code(200);
             $conn->close();
         }
 
-        public function finishUpload(videoID) {
+
+
+
+        public function finishUpload($videoID) {
             // Create a connection to the database
                 $conn = $this->createConnection();
 
@@ -55,7 +62,6 @@ class VideoController
                 file_put_contents($filePath, $videoData);
 
                 $conn->close();
-
         }
 
 

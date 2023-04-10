@@ -17,9 +17,9 @@ $uriParts = explode("/", $_SERVER["REQUEST_URI"]);
 $endpoint = $uriParts[4] ?? null;
 
 // Instantiate the appropriate controller based on the endpoint
-if ($endpoint == "getVideoId") {
+if ($endpoint == "getVideoId" && $_SERVER["REQUEST_METHOD"] == "GET") {
     $controller = new VideoController;
     $controller->getVideoId();
-} else {
-    http_response_code(404);
 }
+// Don't add an `else` here with an error, CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET but an OPTION
+// Adding an else makes that preflight fail and the fetch never happens

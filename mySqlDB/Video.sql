@@ -23,8 +23,7 @@ CREATE TABLE `Videos` (
 CREATE TABLE `Segments` (
   `id` int AUTO_INCREMENT,
   `video_id` int NOT NULL,
-  'sequenceNumber' int NOT NULL,
-  'isDelivered' BOOL NOT NULL,
+  `sequenceNumber` int NOT NULL,
   `seg_data` LONGBLOB NOT NULL,
   PRIMARY KEY (id),
   CONSTRAINT `videoFK` FOREIGN KEY (`video_id`) REFERENCES `Videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

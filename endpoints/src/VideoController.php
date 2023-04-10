@@ -4,10 +4,11 @@ class VideoController
 
         public function uploadSegment() {
             $segment = file_get_contents("php://input");
-            $videoId = $segment['videoId'];
-            $sequenceNumber = $segment['sequenceNumber'];
-            $isDelivered = $segment['isDelivered'];
-            $data = $segment['data'];
+            $segmentArray = json_decode($segment, true);
+            $videoId = $segmentArray['videoId'];
+            $sequenceNumber = $segmentArray['sequenceNumber'];
+            $isDelivered = $segmentArray['isDelivered'];
+            $data = $segmentArray['data'];
 
             $conn = $this->createConnection();
 

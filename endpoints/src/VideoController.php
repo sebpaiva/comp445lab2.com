@@ -3,39 +3,30 @@ class VideoController
 {
 
         public function uploadSegment() {
-
-
            // Read request body as raw data
            $json = file_get_contents('php://input');
 
-
            // Decode the JSON string into an associative array
-           $segment = json_decode($json, true);
-
-
-           //if ($segment === null) {
-             //  // Invalid JSON, send error response
-               //http_response_code(400);
-               //echo json_encode(array("error" => "Invalid JSON"));
-               //return;
-           //}
-
+           $segment = json_decode($json,true);
 
            // Extract data from request body
            $videoId = $segment["videoId"];
            $sequenceNumber = $segment["sequenceNumber"];
            $isDelivered = $segment["isDelivered"];
-           $data = $segment["data"];
+           $base64data = $segment["data"];
 
+           //Debugging
+           //echo json_encode($videoId);
+           //echo json_encode($sequenceNumber);
+           //echo json_encode($isDelivered);
+           //echo json_encode($base64data);
 
            // Create database connection
            $conn = $this->createConnection();
 
-
            // Check if the segment already exists
            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
            $result = $conn->query($sql);
-
 
            if ($result->num_rows > 0) {
                //Sequence number already exists, send success response and return
@@ -43,21 +34,16 @@ class VideoController
                return;
            }
 
-
            // Insert the new segment into the database
-           $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$data')";
+           $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$dataJSON')";
            $conn->query($sql);
-
 
            // Send success response
            http_response_code(200);
 
-
            // Close database connection
            $conn->close();
         }
-
-
 
 
 

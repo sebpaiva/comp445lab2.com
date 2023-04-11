@@ -10,10 +10,10 @@ class VideoController
             $segment_decoded = json_decode($segment);
 
             // Extract data from request body
-            $videoId = $segmentArray->videoId;
-            $sequenceNumber = $segmentArray->sequenceNumber;
-            $isDelivered = $segmentArray->isDelivered;
-            $data = $segmentArray->data;
+            $videoId = $segment_decoded->videoId;
+            $sequenceNumber = $segment_decoded->sequenceNumber;
+            $isDelivered = $segment_decoded->isDelivered;
+            $data = $segment_decoded->data;
 
             // Create database connection
             $conn = $this->createConnection();

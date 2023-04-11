@@ -3,41 +3,40 @@ class VideoController
 {
 
         public function uploadSegment() {
-            // Read request body as raw data
-            $segment = file_get_contents("php://input");
+                // Read request body as raw data
+                $segment = file_get_contents("php://input");
 
-            // Parse request body as JSON
-            $segment_decoded = json_decode($segment);
+                // Parse request body as JSON
+                $segment_decoded = json_decode($segment);
 
-            // Extract data from request body
-            $videoId = $segment_decoded->videoId;
-            $sequenceNumber = $segment_decoded->sequenceNumber;
-            $isDelivered = $segment_decoded->isDelivered;
-            $data = $segment_decoded->data;
+                // Extract data from request body
+                $videoId = $segment_decoded->videoId;
+                $sequenceNumber = $segment_decoded->sequenceNumber;
+                $isDelivered = $segment_decoded->isDelivered;
+                $data = $segment_decoded->data;
 
-            // Create database connection
-            $conn = $this->createConnection();
+                // Create database connection
+                $conn = $this->createConnection();
 
+                // Check if the segment already exists
+                $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
+                $result = $conn->query($sql);
 
-            // Check if the segment already exists
-            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = $videoId AND sequenceNumber = $sequenceNumber";
-            $result = $conn->query($sql)->fetch(PDO::FETCH_ASSOC);
+                if ($result->num_rows > 0) {
+                    // Sequence number already exists, send success response and return
+                    http_response_code(200);
+                    return;
+                }
 
-            if ($result['COUNT(*)'] > 0) {
-                // Sequence number already exists, send success response and return
+                // Insert the new segment into the database
+                $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$data')";
+                $conn->query($sql);
+
+                // Send success response
                 http_response_code(200);
-                return;
-            }
 
-            // Insert the new segment into the database
-            $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ($videoId, $sequenceNumber, $isDelivered, $data)";
-            $conn->query($sql);
-
-            // Send success response
-            http_response_code(200);
-
-            // Close database connection
-            $conn->close();
+                // Close database connection
+                $conn->close();
         }
 
 

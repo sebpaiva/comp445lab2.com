@@ -3,41 +3,60 @@ class VideoController
 {
 
         public function uploadSegment() {
-                // Read request body as raw data
-                $segment = file_get_contents("php://input");
 
-                // Parse request body as JSON
-                $segment_decoded = json_decode($segment);
 
-                // Extract data from request body
-                $videoId = $segment_decoded->videoId;
-                $sequenceNumber = $segment_decoded->sequenceNumber;
-                $isDelivered = $segment_decoded->isDelivered;
-                $data = $segment_decoded->data;
+           // Read request body as raw data
+           $json = file_get_contents('php://input');
 
-                // Create database connection
-                $conn = $this->createConnection();
 
-                // Check if the segment already exists
-                $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
-                $result = $conn->query($sql);
+           // Decode the JSON string into an associative array
+           $segment = json_decode($json, true);
 
-                if ($result->num_rows > 0) {
-                    // Sequence number already exists, send success response and return
-                    http_response_code(200);
-                    return;
-                }
 
-                // Insert the new segment into the database
-                $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$data')";
-                $conn->query($sql);
+           //if ($segment === null) {
+             //  // Invalid JSON, send error response
+               //http_response_code(400);
+               //echo json_encode(array("error" => "Invalid JSON"));
+               //return;
+           //}
 
-                // Send success response
-                http_response_code(200);
 
-                // Close database connection
-                $conn->close();
+           // Extract data from request body
+           $videoId = $segment["videoId"];
+           $sequenceNumber = $segment["sequenceNumber"];
+           $isDelivered = $segment["isDelivered"];
+           $data = $segment["data"];
+
+
+           // Create database connection
+           $conn = $this->createConnection();
+
+
+           // Check if the segment already exists
+           $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
+           $result = $conn->query($sql);
+
+
+           if ($result->num_rows > 0) {
+               //Sequence number already exists, send success response and return
+               http_response_code(200);
+               return;
+           }
+
+
+           // Insert the new segment into the database
+           $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$data')";
+           $conn->query($sql);
+
+
+           // Send success response
+           http_response_code(200);
+
+
+           // Close database connection
+           $conn->close();
         }
+
 
 
 

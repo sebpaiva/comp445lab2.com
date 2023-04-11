@@ -20,12 +20,8 @@ class VideoController
 
 
             // Check if the segment already exists
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM Segments WHERE video_id = ? AND sequenceNumber = ?");
-            $stmt->bindParam(1, $videoId);
-            $stmt->bindParam(2, $sequenceNumber);
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt->close();
+            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = $videoId AND sequenceNumber = $sequenceNumber";
+            $result = $conn->query($sql)->fetch(PDO::FETCH_ASSOC);
 
             if ($result['COUNT(*)'] > 0) {
                 // Sequence number already exists, send success response and return
@@ -34,13 +30,8 @@ class VideoController
             }
 
             // Insert the new segment into the database
-            $stmt = $conn->prepare("INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES (?, ?, ?, ?)");
-            $stmt->bindParam(1, $videoId);
-            $stmt->bindParam(2, $sequenceNumber);
-            $stmt->bindParam(3, $isDelivered);
-            $stmt->bindParam(4, $data, PDO::PARAM_LOB);
-            $stmt->execute();
-            $stmt->close();
+            $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ($videoId, $sequenceNumber, $isDelivered, $data)";
+            $conn->query($sql);
 
             // Send success response
             http_response_code(200);

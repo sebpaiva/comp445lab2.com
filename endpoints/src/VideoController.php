@@ -3,20 +3,27 @@ class VideoController
 {
 
         public function uploadSegment() {
+            // Read request body as raw data
             $segment = file_get_contents("php://input");
-            $segmentArray = json_decode($segment, true);
-            $videoId = $segmentArray['videoId'];
-            $sequenceNumber = $segmentArray['sequenceNumber'];
-            $isDelivered = $segmentArray['isDelivered'];
-            $data = $segmentArray['data'];
 
+            // Parse request body as JSON
+            $segment_decoded = json_decode($segment);
+
+            // Extract data from request body
+            $videoId = $segmentArray->videoId;
+            $sequenceNumber = $segmentArray->sequenceNumber;
+            $isDelivered = $segmentArray->isDelivered;
+            $data = $segmentArray->data;
+
+            // Create database connection
             $conn = $this->createConnection();
 
+
+            // Check if the segment already exists
             $stmt = $conn->prepare("SELECT COUNT(*) FROM Segments WHERE video_id = ? AND sequenceNumber = ?");
             $stmt->bindParam(1, $videoId);
             $stmt->bindParam(2, $sequenceNumber);
             $stmt->execute();
-
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->close();
 
@@ -26,6 +33,7 @@ class VideoController
                 return;
             }
 
+            // Insert the new segment into the database
             $stmt = $conn->prepare("INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES (?, ?, ?, ?)");
             $stmt->bindParam(1, $videoId);
             $stmt->bindParam(2, $sequenceNumber);
@@ -34,8 +42,10 @@ class VideoController
             $stmt->execute();
             $stmt->close();
 
-
+            // Send success response
             http_response_code(200);
+
+            // Close database connection
             $conn->close();
         }
 

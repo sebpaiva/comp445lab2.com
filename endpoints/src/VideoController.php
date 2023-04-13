@@ -13,7 +13,7 @@ class VideoController
            $videoId = $segment["videoId"];
            $sequenceNumber = $segment["sequenceNumber"];
            $isDelivered = $segment["isDelivered"];
-           $base64data = $segment["data"];
+           $base64data = $segment["data"];   // " data:video..... "
 
            //Debugging
            //echo json_encode($videoId);
@@ -24,21 +24,24 @@ class VideoController
            // Create database connection
            $conn = $this->createConnection();
 
-           // Check if the segment already exists
-           $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
-           $result = $conn->query($sql);
-
-           if ($result->num_rows > 0) {
-               //Sequence number already exists, send success response and return
-               http_response_code(200);
-               return;
-           }
+//            // Check if the segment already exists
+//            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
+//            $result = $conn->query($sql);
+//            echo($result)
+//
+//            if ($result->num_rows > 0) {
+//                //Sequence number already exists, send success response and return
+//                echo json_encode(["success" => "Duplicate Ignored" .$videoId . " " . $sequenceNumber]);
+//                http_response_code(200);
+//                return;
+//            }
 
            // Insert the new segment into the database
-           $sql = "INSERT INTO Segments (video_id, sequenceNumber, isDelivered, seg_data) VALUES ('$videoId', '$sequenceNumber', '$isDelivered', '$dataJSON')";
+           $sql = "INSERT INTO Segments (video_id, sequenceNumber, seg_data) VALUES ('$videoId', '$sequenceNumber', '$base64data')";
            $conn->query($sql);
 
            // Send success response
+           echo json_encode(["success" => "Successfully received" .$videoId . " " . $sequenceNumber ]);
            http_response_code(200);
 
            // Close database connection
@@ -47,28 +50,51 @@ class VideoController
 
 
 
-        public function finishUpload($videoID) {
-            // Create a connection to the database
-                $conn = $this->createConnection();
+       public function finishUpload($videoID) {
+           // Create a connection to the database
+           $conn = $this->createConnection();
 
-                // Retrieve all segments for the given videoID
-                $sql = "SELECT segment FROM Segments WHERE videoID = :videoID ORDER BY segmentID";
-                $stmt = $conn->prepare($sql);
-                $stmt->bindValue(":videoID", $videoID, PDO::PARAM_INT);
-                $stmt->execute();
+           // Retrieve all segment's sequenceNumbers for the given videoID
+           $sql = "SELECT * FROM Segments WHERE video_id = '$videoID' ORDER BY sequenceNumber";
+           $result = $conn->query($sql);
 
-                // Combine the segments into a single video file
-                $videoData = "";
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $videoData .= $row["segment"];
-                }
+           // Combine the segment's sequenceNumbers into a single video file
+           $videoData = "";
+           if($result->num_rows > 0){
+                  // All segments
+                  while($row = $result->fetch_assoc()){
+                  // we must parse out the "data:video......"
+                  // Get the base64-encoded data
+                  $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
+                  echo($parsed_data);
+                  $videoData .= $parsed_data;
+                  echo json_encode("HELLO");
+              }
+//                     //First segment only
+//                     echo json_encode($row["seg_data"]);
+//                     echo json_encode("HELLO");
+//                     $row = $result->fetch_assoc();
+//                     $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
+//                     $videoData .= $parsed_data;
+//                     echo json_encode($videoData);
+          }
 
-                // Store the assembled video under the videos folder
-                $filePath = "videos/video_$videoID.mp4";
-                file_put_contents($filePath, $videoData);
+           // Convert base64 to binary so its playable
+           $binaryData = base64_decode($videoData);
 
-                $conn->close();
-        }
+
+           $fileName = $videoID . ".mkv";
+           $filePath = 'C:\wamp64\www\comp445lab2.com\videos' . $fileName;
+           //file_put_contents($filePath, $videoData);
+           file_put_contents($filePath, $binaryData);
+
+           echo json_encode(["success" => "Successfully assembled the segments from " . $videoID]);
+           http_response_code(200);
+
+           $conn->close();
+       }
+
+
 
 
          /**

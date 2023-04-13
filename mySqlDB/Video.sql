@@ -1,4 +1,4 @@
--- 
+--
 -- DATABASE CREATION
 --
 
@@ -29,7 +29,7 @@ CREATE TABLE `Segments` (
   CONSTRAINT `videoFK` FOREIGN KEY (`video_id`) REFERENCES `Videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- 
+--
 -- DATA INSERTS
 --
 INSERT INTO `Videos` (id, name) VALUES

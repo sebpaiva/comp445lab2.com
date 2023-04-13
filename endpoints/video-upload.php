@@ -34,14 +34,15 @@ if ($endpoint == "getVideoId" && $_SERVER["REQUEST_METHOD"] == "GET") {
     // CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET
     // This else if is exclusively so that the preflight call doesn't increase the id before the actual call
     http_response_code(200);
-} else if ($endpoint == "finishUpload/{$vid_ID}" && $_SERVER["REQUEST_METHOD"] == "GET") {
+} else if ($endpoint == "finishUpload" && $_SERVER["REQUEST_METHOD"] == "GET") {
     $controller = new VideoController;
     $controller->finishUpload($vid_ID);
-} else if ($endpoint == "finishUpload/{$vid_ID}"){
+} else if ($endpoint == "finishUpload"){
     // CORS will do two calls to an endpoint (1.preflight(cors valition), 2.fetch(actual call)) and the first one is not a GET
     // This else if is exclusively so that the preflight call doesn't increase the id before the actual call
     http_response_code(200);
 } else {
+    echo json_encode(["error" => "ERROR HERER"]);
     http_response_code(404);
 }
 

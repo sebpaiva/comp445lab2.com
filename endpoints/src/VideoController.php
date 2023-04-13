@@ -25,18 +25,6 @@ class VideoController
         // Create database connection
         $conn = $this->createConnection();
 
-        //            // Check if the segment already exists
-//            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
-//            $result = $conn->query($sql);
-//            echo($result)
-//
-//            if ($result->num_rows > 0) {
-//                //Sequence number already exists, send success response and return
-//                echo json_encode(["success" => "Duplicate Ignored" .$videoId . " " . $sequenceNumber]);
-//                http_response_code(200);
-//                return;
-//            }
-
         // Insert the new segment into the database
         $sql = "INSERT INTO Segments (video_id, sequenceNumber, seg_data) VALUES ('$videoId', '$sequenceNumber', '$base64data')";
         $conn->query($sql);
@@ -92,6 +80,7 @@ class VideoController
     /**
      * Get all video names from the Videos sql table
      */
+     //Used in index.php
     public function getAllVideosName()
     {
         $conn = $this->createConnection();
@@ -112,6 +101,7 @@ class VideoController
         return $result;
     }
 
+    // Used in "Browse all videos"
     public function getAllVideos()
     {
         $conn = $this->createConnection();
@@ -153,7 +143,7 @@ class VideoController
         }
 
         // Insert a new row into the videos table with the next available id
-        $sql = "INSERT INTO Videos (id, name) VALUES ('$nextId', 'video_$nextId.mp4')";
+        $sql = "INSERT INTO Videos (id, name) VALUES ('$nextId', 'video$nextId.mp4')";
         $conn->query($sql);
 
         $conn->close();
@@ -254,6 +244,7 @@ class VideoController
         return $fileType != "mp4" && $fileType != "avi" && $fileType != "mov";
     }
 
+    // Used in "Video Search"
     public function processRequest($method, $id): void
     {
         // Return video matching the id

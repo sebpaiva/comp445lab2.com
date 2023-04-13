@@ -74,21 +74,11 @@ class VideoController
                 $binaryData = base64_decode($parsed_data);
 
                 $videoData .= $binaryData;
-
-                
-                //   echo json_encode("HELLO");
             }
-            //                     //First segment only
-//                     echo json_encode($row["seg_data"]);
-//                     echo json_encode("HELLO");
-//                     $row = $result->fetch_assoc();
-//                     $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
-//                     $videoData .= $parsed_data;
-//                     echo json_encode($videoData);
         }
 
 
-        $fileName = $videoID . ".mkv";
+        $fileName = $videoID . ".mp4";
         $filePath = 'C:\wamp64\www\comp445lab2.com\videos\video' . $fileName;
         //file_put_contents($filePath, $videoData);
         file_put_contents($filePath, $videoData);
@@ -98,9 +88,6 @@ class VideoController
 
         $conn->close();
     }
-
-
-
 
     /**
      * Get all video names from the Videos sql table

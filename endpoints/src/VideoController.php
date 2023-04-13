@@ -2,29 +2,30 @@
 class VideoController
 {
 
-        public function uploadSegment() {
-           // Read request body as raw data
-           $json = file_get_contents('php://input');
+    public function uploadSegment()
+    {
+        // Read request body as raw data
+        $json = file_get_contents('php://input');
 
-           // Decode the JSON string into an associative array
-           $segment = json_decode($json,true);
+        // Decode the JSON string into an associative array
+        $segment = json_decode($json, true);
 
-           // Extract data from request body
-           $videoId = $segment["videoId"];
-           $sequenceNumber = $segment["sequenceNumber"];
-           $isDelivered = $segment["isDelivered"];
-           $base64data = $segment["data"];   // " data:video..... "
+        // Extract data from request body
+        $videoId = $segment["videoId"];
+        $sequenceNumber = $segment["sequenceNumber"];
+        $isDelivered = $segment["isDelivered"];
+        $base64data = $segment["data"]; // " data:video..... "
 
-           //Debugging
-           //echo json_encode($videoId);
-           //echo json_encode($sequenceNumber);
-           //echo json_encode($isDelivered);
-           //echo json_encode($base64data);
+        //Debugging
+        //echo json_encode($videoId);
+        //echo json_encode($sequenceNumber);
+        //echo json_encode($isDelivered);
+        //echo json_encode($base64data);
 
-           // Create database connection
-           $conn = $this->createConnection();
+        // Create database connection
+        $conn = $this->createConnection();
 
-//            // Check if the segment already exists
+        //            // Check if the segment already exists
 //            $sql = "SELECT COUNT(*) FROM Segments WHERE video_id = '$videoId' AND sequenceNumber = '$sequenceNumber'";
 //            $result = $conn->query($sql);
 //            echo($result)
@@ -36,112 +37,116 @@ class VideoController
 //                return;
 //            }
 
-           // Insert the new segment into the database
-           $sql = "INSERT INTO Segments (video_id, sequenceNumber, seg_data) VALUES ('$videoId', '$sequenceNumber', '$base64data')";
-           $conn->query($sql);
+        // Insert the new segment into the database
+        $sql = "INSERT INTO Segments (video_id, sequenceNumber, seg_data) VALUES ('$videoId', '$sequenceNumber', '$base64data')";
+        $conn->query($sql);
 
-           // Send success response
-           echo json_encode(["success" => "Successfully received" .$videoId . " " . $sequenceNumber ]);
-           http_response_code(200);
+        // Send success response
+        echo json_encode(["success" => "Successfully received" . $videoId . " " . $sequenceNumber]);
+        http_response_code(200);
 
-           // Close database connection
-           $conn->close();
-        }
+        // Close database connection
+        $conn->close();
+    }
 
 
 
-       public function finishUpload($videoID) {
-           // Create a connection to the database
-           $conn = $this->createConnection();
+    public function finishUpload($videoID)
+    {
+        // Create a connection to the database
+        $conn = $this->createConnection();
 
-           // Retrieve all segment's sequenceNumbers for the given videoID
-           $sql = "SELECT * FROM Segments WHERE video_id = '$videoID' ORDER BY sequenceNumber";
-           $result = $conn->query($sql);
+        // Retrieve all segment's sequenceNumbers for the given videoID
+        $sql = "SELECT * FROM Segments WHERE video_id = '$videoID' ORDER BY sequenceNumber";
+        $result = $conn->query($sql);
 
-           // Combine the segment's sequenceNumbers into a single video file
-           $videoData = "";
-           if($result->num_rows > 0){
-                  // All segments
-                  while($row = $result->fetch_assoc()){
-                  // we must parse out the "data:video......"
-                  // Get the base64-encoded data
-                  $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
-                  echo($parsed_data);
-                  $videoData .= $parsed_data;
-                  echo json_encode("HELLO");
-              }
-//                     //First segment only
+        // Combine the segment's sequenceNumbers into a single video file
+        $videoData = "";
+        if ($result->num_rows > 0) {
+            // All segments
+            while ($row = $result->fetch_assoc()) {
+                // we must parse out the "data:video......"
+                // Get the base64-encoded data
+                $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
+                //   echo($parsed_data);
+
+                // Convert base64 to binary so its playable
+                $binaryData = base64_decode($parsed_data);
+
+                $videoData .= $binaryData;
+
+                
+                //   echo json_encode("HELLO");
+            }
+            //                     //First segment only
 //                     echo json_encode($row["seg_data"]);
 //                     echo json_encode("HELLO");
 //                     $row = $result->fetch_assoc();
 //                     $parsed_data = explode(",", explode(";", $row["seg_data"])[2])[1]; // "GkXfo6NChoEBQveBAULygQRC84
 //                     $videoData .= $parsed_data;
 //                     echo json_encode($videoData);
-          }
-
-           // Convert base64 to binary so its playable
-           $binaryData = base64_decode($videoData);
-
-
-           $fileName = $videoID . ".mkv";
-           $filePath = 'C:\wamp64\www\comp445lab2.com\videos' . $fileName;
-           //file_put_contents($filePath, $videoData);
-           file_put_contents($filePath, $binaryData);
-
-           echo json_encode(["success" => "Successfully assembled the segments from " . $videoID]);
-           http_response_code(200);
-
-           $conn->close();
-       }
-
-
-
-
-         /**
-         * Get all video names from the Videos sql table
-         */
-        public function getAllVideosName()
-        {
-            $conn = $this->createConnection();
-
-            $sql = "SELECT name FROM Videos";
-            $sqlResult = $conn->query($sql);
-
-            $result = [];
-
-            if ($sqlResult->num_rows > 0) {
-                while ($row = $sqlResult->fetch_assoc()) {
-                    array_push($result, $row["name"]);
-                }
-            }
-
-            $conn->close();
-
-            return $result;
         }
 
-        public function getAllVideos()
-        {
-            $conn = $this->createConnection();
 
-            $sql = "SELECT id, name FROM Videos";
-            $sqlResult = $conn->query($sql);
+        $fileName = $videoID . ".mkv";
+        $filePath = 'C:\wamp64\www\comp445lab2.com\videos\video' . $fileName;
+        //file_put_contents($filePath, $videoData);
+        file_put_contents($filePath, $videoData);
 
-            $result = [];
+        echo json_encode(["success" => "Successfully assembled the segments from " . $videoID]);
+        http_response_code(200);
 
-            if ($sqlResult->num_rows > 0) {
-                while ($row = $sqlResult->fetch_assoc()) {
-                    $id = $row["id"];
-                    $name = $row["name"];
-                    $data = base64_encode(file_get_contents("../videos/" . $name));
-                    $result[] = ["id" => $id, "name" => $name, "data" => $data];
-                }
+        $conn->close();
+    }
+
+
+
+
+    /**
+     * Get all video names from the Videos sql table
+     */
+    public function getAllVideosName()
+    {
+        $conn = $this->createConnection();
+
+        $sql = "SELECT name FROM Videos";
+        $sqlResult = $conn->query($sql);
+
+        $result = [];
+
+        if ($sqlResult->num_rows > 0) {
+            while ($row = $sqlResult->fetch_assoc()) {
+                array_push($result, $row["name"]);
             }
-
-            $conn->close();
-
-            return $result;
         }
+
+        $conn->close();
+
+        return $result;
+    }
+
+    public function getAllVideos()
+    {
+        $conn = $this->createConnection();
+
+        $sql = "SELECT id, name FROM Videos";
+        $sqlResult = $conn->query($sql);
+
+        $result = [];
+
+        if ($sqlResult->num_rows > 0) {
+            while ($row = $sqlResult->fetch_assoc()) {
+                $id = $row["id"];
+                $name = $row["name"];
+                $data = base64_encode(file_get_contents("../videos/" . $name));
+                $result[] = ["id" => $id, "name" => $name, "data" => $data];
+            }
+        }
+
+        $conn->close();
+
+        return $result;
+    }
 
     /**
      * Helper function to get the next available video ID
@@ -170,14 +175,14 @@ class VideoController
     }
 
     /**
-    * Endpoint to get the ID of the next video and insert a new row into the Videos table
-    */
-        public function getVideoId()
-        {
-            $nextId = $this->getNextVideoId();
+     * Endpoint to get the ID of the next video and insert a new row into the Videos table
+     */
+    public function getVideoId()
+    {
+        $nextId = $this->getNextVideoId();
 
-            echo json_encode(["id" => $nextId]);
-        }
+        echo json_encode(["id" => $nextId]);
+    }
 
 
 
@@ -257,21 +262,20 @@ class VideoController
     /**
      * Helper function for #getVideoForId
      */
-    private function notSupportedFileType($fileType): bool{
+    private function notSupportedFileType($fileType): bool
+    {
         return $fileType != "mp4" && $fileType != "avi" && $fileType != "mov";
     }
 
     public function processRequest($method, $id): void
     {
         // Return video matching the id
-        if ($method == "GET" && $id) 
-        {
+        if ($method == "GET" && $id) {
             $this->getVideoForId($id);
         }
 
         // Return all videos
-        else if ($method == "GET")
-        {
+        else if ($method == "GET") {
             $videos = $this->getAllVideos();
             echo json_encode($videos);
         }
